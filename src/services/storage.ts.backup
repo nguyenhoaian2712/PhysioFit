@@ -1,0 +1,113 @@
+import { User, PainRecord, ROMRecord, WorkoutSession, BodyRegionId } from '../types';
+
+const STORAGE_KEYS = {
+  USER: 'physiofit_user',
+  PAIN: 'physiofit_pain_records',
+  ROM: 'physiofit_rom_records',
+  SESSIONS: 'physiofit_workout_sessions'
+};
+
+export const DEMO_USER: User = {
+  id: "demo-user-001",
+  fullName: "Nguyễn Văn A",
+  age: 35,
+  location: "Hà Nội",
+  commonConditions: ["Đau lưng", "Đau khớp gối"],
+  otherCondition: "",
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+  onboardingCompleted: true,
+  savedExerciseIds: ['ex-09', 'ex-01', 'ex-12', 'ex-28'],
+  dailyGoalMinutes: 15,
+  preferences: {
+    soundEnabled: true,
+    ambientVolume: 0.35,
+    sparklesEnabled: true
+  }
+};
+
+export const storageService = {
+  getUser(): User {
+    try {
+      const data = localStorage.getItem(STORAGE_KEYS.USER);
+      if (data) return JSON.parse(data);
+    } catch (e) {
+      console.error(e);
+    }
+    this.saveUser(DEMO_USER);
+    return DEMO_USER;
+  },
+
+  saveUser(user: User): void {
+    try {
+      localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
+    } catch (e) {
+      console.error(e);
+    }
+  },
+
+  getPainRecords(): PainRecord[] {
+    try {
+      const data = localStorage.getItem(STORAGE_KEYS.PAIN);
+      if (data) return JSON.parse(data);
+    } catch (e) {}
+    return [];
+  },
+
+  addPainRecord(record: Omit<PainRecord, 'id' | 'timestamp'>): PainRecord {
+    const list = this.getPainRecords();
+    const newRecord: PainRecord = {
+      ...record,
+      id: 'pain-' + Date.now(),
+      timestamp: new Date().toISOString()
+    };
+    list.unshift(newRecord);
+    localStorage.setItem(STORAGE_KEYS.PAIN, JSON.stringify(list));
+    return newRecord;
+  },
+
+  getROMRecords(): ROMRecord[] {
+    try {
+      const data = localStorage.getItem(STORAGE_KEYS.ROM);
+      if (data) return JSON.parse(data);
+    } catch (e) {}
+    return [];
+  },
+
+  addROMRecord(record: Omit<ROMRecord, 'id' | 'timestamp'>): ROMRecord {
+    const list = this.getROMRecords();
+    const newRecord: ROMRecord = {
+      ...record,
+      id: 'rom-' + Date.now(),
+      timestamp: new Date().toISOString()
+    };
+    list.unshift(newRecord);
+    localStorage.setItem(STORAGE_KEYS.ROM, JSON.stringify(list));
+    return newRecord;
+  },
+
+  getSessions(): WorkoutSession[] {
+    try {
+      const data = localStorage.getItem(STORAGE_KEYS.SESSIONS);
+      if (data) return JSON.parse(data);
+    } catch (e) {}
+    return [];
+  },
+
+  addSession(session: Omit<WorkoutSession, 'id' | 'timestamp'>): WorkoutSession {
+    const list = this.getSessions();
+    const newSession: WorkoutSession = {
+      ...session,
+      id: 'sess-' + Date.now(),
+      timestamp: new Date().toISOString()
+    };
+    list.unshift(newSession);
+    localStorage.setItem(STORAGE_KEYS.SESSIONS, JSON.stringify(list));
+    return newSession;
+  },
+
+  resetAll(): void {
+    localStorage.clear();
+    this.saveUser(DEMO_USER);
+  }
+};

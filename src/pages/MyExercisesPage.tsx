@@ -1,0 +1,275 @@
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { 
+  Bookmark, 
+  Layers, 
+  History, 
+  Play, 
+  Clock, 
+  Trash2, 
+  Plus, 
+  HeartPulse, 
+  Sparkles,
+  ArrowRight,
+  CheckCircle2
+} from 'lucide-react';
+import { UserProfile, WorkoutSession } from '../types';
+import { EXERCISES_DATA } from '../data/exercises';
+import { ExerciseCard } from '../components/ExerciseCard';
+
+interface MyExercisesPageProps {
+  user: UserProfile;
+  sessions: WorkoutSession[];
+  isBookmarked: (id: string) => boolean;
+  onToggleBookmark: (id: string) => void;
+}
+
+export const MyExercisesPage: React.FC<MyExercisesPageProps> = ({
+  user,
+  sessions,
+  isBookmarked,
+  onToggleBookmark
+}) => {
+  const [activeTab, setActiveTab] = useState<'saved' | 'routines' | 'history'>('saved');
+
+  const savedExerciseIds = Array.isArray(user?.savedExerciseIds) ? user.savedExerciseIds : [];
+  const customRoutines = Array.isArray(user?.customRoutines) ? user.customRoutines : [];
+  const safeSessions = Array.isArray(sessions) ? sessions : [];
+
+  // Filter bookmarked exercises
+  const savedExercises = EXERCISES_DATA.filter((e) =>
+    savedExerciseIds.includes(e.id)
+  );
+
+  return (
+    <div className="space-y-8 py-4 sm:py-6">
+      {/* Header */}
+      <div className="text-center max-w-3xl mx-auto space-y-3">
+        <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[#C7DFA3] text-[#31465A] text-xs font-bold shadow-sm">
+          <Bookmark className="w-3.5 h-3.5" />
+          <span>Kế hoạch cá nhân</span>
+        </div>
+
+        <h1 className="text-3xl sm:text-4xl font-extrabold text-[#31465A] tracking-tight">
+          Bài Tập Của Tôi
+        </h1>
+
+        <p className="text-sm text-[#31465A]/80 leading-relaxed">
+          Quản lý danh sách các bài tập đã lưu, các phác đồ tập luyện định kỳ và lịch sử các buổi tập đã hoàn thành.
+        </p>
+
+        {/* Tab switch */}
+        <div className="flex justify-center pt-2">
+          <div className="inline-flex bg-[#D9F0FF]/60 p-1.5 rounded-2xl border border-[#31465A]/10">
+            <button
+              onClick={() => setActiveTab('saved')}
+              className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-1.5 transition-all ${
+                activeTab === 'saved'
+                  ? 'bg-[#31465A] text-[#FFFDF7] shadow-sm'
+                  : 'text-[#31465A]/70 hover:text-[#31465A]'
+              }`}
+            >
+              <Bookmark className="w-4 h-4" />
+              <span>Đã lưu ({savedExercises.length})</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('routines')}
+              className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-1.5 transition-all ${
+                activeTab === 'routines'
+                  ? 'bg-[#31465A] text-[#FFFDF7] shadow-sm'
+                  : 'text-[#31465A]/70 hover:text-[#31465A]'
+              }`}
+            >
+              <Layers className="w-4 h-4" />
+              <span>Phác đồ tùy chỉnh ({customRoutines.length})</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('history')}
+              className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-1.5 transition-all ${
+                activeTab === 'history'
+                  ? 'bg-[#31465A] text-[#FFFDF7] shadow-sm'
+                  : 'text-[#31465A]/70 hover:text-[#31465A]'
+              }`}
+            >
+              <History className="w-4 h-4" />
+              <span>Lịch sử tập ({safeSessions.length})</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Tab 1: Saved Bookmarks */}
+      {activeTab === 'saved' && (
+        <div className="space-y-6 animate-fadeIn">
+          {savedExercises.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {savedExercises.map((exercise) => (
+                <ExerciseCard
+                  key={exercise.id}
+                  exercise={exercise}
+                  isBookmarked={true}
+                  onToggleBookmark={onToggleBookmark}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-16 bg-[#FFFDF7] rounded-3xl border border-[#31465A]/10 p-8 space-y-4">
+              <div className="w-12 h-12 rounded-2xl bg-[#D9F0FF] flex items-center justify-center text-[#31465A] mx-auto">
+                <Bookmark className="w-6 h-6 text-[#31465A]" />
+              </div>
+              <h3 className="font-bold text-base text-[#31465A]">
+                Bạn chưa lưu bài tập nào
+              </h3>
+              <p className="text-xs text-[#31465A]/70 max-w-sm mx-auto">
+                Hãy nhấn biểu tượng chiếc ghim/bookmark trên các thẻ bài tập trong thư viện để lưu lại đây.
+              </p>
+              <Link
+                to="/exercises"
+                className="inline-block py-3 px-6 rounded-2xl bg-[#31465A] text-[#FFFDF7] text-xs font-bold shadow-sm"
+              >
+                Khám phá 33 bài tập
+              </Link>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Tab 2: Custom Routines */}
+      {activeTab === 'routines' && (
+        <div className="space-y-6 animate-fadeIn">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {customRoutines.map((routine) => {
+              const routineExercises = EXERCISES_DATA.filter((e) =>
+                routine.exerciseIds.includes(e.id)
+              );
+              const totalRoutineMinutes = routineExercises.reduce(
+                (acc, e) => acc + e.durationMinutes,
+                0
+              );
+
+              return (
+                <div
+                  key={routine.id}
+                  className="bg-[#FFFDF7] rounded-3xl p-6 border border-[#31465A]/10 shadow-sm space-y-4 hover:border-[#89B9E6] transition-colors"
+                >
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-[#C7DFA3] text-[#31465A]">
+                        Phác đồ tập luyện
+                      </span>
+                      <h3 className="font-bold text-lg text-[#31465A] mt-1">
+                        {routine.title}
+                      </h3>
+                      <p className="text-xs text-[#31465A]/70 flex items-center gap-1 mt-0.5">
+                        <Clock className="w-3.5 h-3.5" />
+                        <span>{totalRoutineMinutes} phút tổng cộng • {routineExercises.length} bài tập</span>
+                      </p>
+                    </div>
+
+                    <Link
+                      to={`/session/${routine.exerciseIds[0] || 'ex-02'}`}
+                      className="py-2.5 px-4 rounded-xl bg-[#31465A] text-[#FFFDF7] text-xs font-bold flex items-center gap-1.5 shadow-sm"
+                    >
+                      <Play className="w-3.5 h-3.5 fill-[#C7DFA3] text-[#C7DFA3]" />
+                      <span>Bắt đầu</span>
+                    </Link>
+                  </div>
+
+                  {/* List of exercises inside routine */}
+                  <div className="space-y-2 pt-2 border-t border-[#31465A]/10">
+                    {routineExercises.map((ex, idx) => (
+                      <Link
+                        key={ex.id}
+                        to={`/exercise/${ex.id}`}
+                        className="flex items-center justify-between p-2.5 rounded-xl bg-[#D9F0FF]/30 hover:bg-[#D9F0FF]/60 transition-colors text-xs"
+                      >
+                        <div className="flex items-center gap-2 truncate">
+                          <span className="w-5 h-5 rounded-lg bg-[#31465A] text-[#FFFDF7] flex items-center justify-center text-[10px] font-bold shrink-0">
+                            {idx + 1}
+                          </span>
+                          <span className="font-medium text-[#31465A] truncate">
+                            {ex.title}
+                          </span>
+                        </div>
+                        <span className="text-[10px] text-[#31465A]/70 shrink-0 ml-2">
+                          {ex.durationMinutes}p
+                        </span>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Tab 3: History of sessions */}
+      {activeTab === 'history' && (
+        <div className="bg-[#FFFDF7] rounded-3xl p-6 sm:p-8 border border-[#31465A]/10 shadow-sm space-y-4 animate-fadeIn">
+          <h3 className="text-lg font-bold text-[#31465A] flex items-center gap-2">
+            <History className="w-5 h-5 text-[#89B9E6]" />
+            <span>Lịch sử các buổi tập đã hoàn thành</span>
+          </h3>
+
+          {safeSessions.length > 0 ? (
+            <div className="space-y-3">
+              {safeSessions.map((sess) => (
+                <div
+                  key={sess.id}
+                  className="p-4 rounded-2xl bg-[#D9F0FF]/25 border border-[#89B9E6]/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs"
+                >
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 font-bold text-[10px]">
+                        ✓ Đã hoàn thành
+                      </span>
+                      <span className="text-[#31465A]/60 text-[11px]">
+                        {new Date(sess.timestamp).toLocaleDateString('vi-VN')} {new Date(sess.timestamp).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                    </div>
+                    <h4 className="font-bold text-sm text-[#31465A]">
+                      {sess.exerciseTitle}
+                    </h4>
+                    {sess.notes && (
+                      <p className="text-[11px] text-[#31465A]/80 italic">
+                        "{sess.notes}"
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-4 shrink-0">
+                    <div>
+                      <span className="text-[10px] text-[#31465A]/60">Thời lượng:</span>
+                      <p className="font-bold text-[#31465A]">
+                        {Math.round(sess.durationSeconds / 60)} phút
+                      </p>
+                    </div>
+
+                    <div>
+                      <span className="text-[10px] text-[#31465A]/60">Mức đau:</span>
+                      <p className="font-bold text-[#31465A]">
+                        {sess.painBefore}/10 → <span className="text-emerald-700">{sess.painAfter}/10</span>
+                      </p>
+                    </div>
+
+                    <Link
+                      to={`/session/${sess.exerciseId}`}
+                      className="py-2 px-3 rounded-xl bg-[#31465A] text-[#FFFDF7] font-semibold text-xs hover:bg-[#31465A]/90 transition-colors"
+                    >
+                      Tập lại
+                    </Link>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-xs text-[#31465A]/60 italic">Chưa có lịch sử buổi tập nào.</p>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
