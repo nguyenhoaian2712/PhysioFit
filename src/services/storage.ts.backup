@@ -111,3 +111,43 @@ export const storageService = {
     this.saveUser(DEMO_USER);
   }
 };
+// Định nghĩa key lưu trữ trong localStorage
+const STORAGE_KEYS = {
+  USER_PROFILE: 'physiofit_user_profile',
+  EXERCISE_HISTORY: 'physiofit_exercise_history',
+  PAIN_LOGS: 'physiofit_pain_logs',
+  PROGRESS_DATA: 'physiofit_progress_data',
+};
+
+// 1. Lưu dữ liệu chung vào localStorage
+export const saveToStorage = (key: string, data: T): void => {
+  try {
+    const serializedData = JSON.stringify(data);
+    localStorage.setItem(key, serializedData);
+  } catch (error) {
+    console.error(`Lỗi khi lưu dữ liệu vào localStorage (key: ${key}):`, error);
+  }
+};
+
+// 2. Lấy dữ liệu từ localStorage
+export const getFromStorage = (key: string, defaultValue: T): T => {
+  try {
+    const item = localStorage.getItem(key);
+    return item ? JSON.parse(item) : defaultValue;
+  } catch (error) {
+    console.error(`Lỗi khi đọc dữ liệu từ localStorage (key: ${key}):`, error);
+    return defaultValue;
+  }
+};
+
+// 3. Xóa dữ liệu
+export const removeFromStorage = (key: string): void => {
+  try {
+    localStorage.removeItem(key);
+  } catch (error) {
+    console.error(`Lỗi khi xóa dữ liệu trong localStorage (key: ${key}):`, error);
+  }
+};
+
+export { STORAGE_KEYS };
+
